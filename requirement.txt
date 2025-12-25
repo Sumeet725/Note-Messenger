@@ -1,0 +1,5 @@
+flask
+flask_CORS
+psycoppg2_binary
+python_dotenv
+cryptology
