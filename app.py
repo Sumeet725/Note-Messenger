@@ -16,7 +16,7 @@ fernet = Fernet(os.environ["FERNET_KEY"].encode())
 
 def get_db():
     return psycopg2.connect(
-        os.environ["postgresql://postgres:[Isitapple.1065]@db.sryfwgoddinaepaqinhl.supabase.co:5432/postgres"],
+        os.environ["DATABASE_URL"],
         sslmode="require"
     )
 
