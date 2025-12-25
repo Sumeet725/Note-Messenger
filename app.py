@@ -15,7 +15,11 @@ CORS(app)
 fernet = Fernet(os.environ["FERNET_KEY"].encode())
 
 def get_db():
-    return psycopg2.connect(os.environ["DATABASE_URL"])
+    return psycopg2.connect(
+        os.environ["DATABASE_URL"],
+        sslmode="require"
+    )
+
 
 def generate_otp():
     return str(random.randint(100000, 999999))
