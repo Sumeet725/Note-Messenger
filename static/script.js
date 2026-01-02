@@ -8,7 +8,7 @@ async function createNote() {
     }
 
     try {
-        const res = await fetch("/api/notes", {
+        const res = await fetch("api/notes", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text })
@@ -35,7 +35,7 @@ async function getNote() {
     }
 
     try {
-        const res = await fetch("/api/notes/retrieve", {
+        const res = await fetch("api/notes/retrieve", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ otp })
