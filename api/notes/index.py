@@ -1,47 +1,31 @@
-import json
-import random
+import json, os, random
 from datetime import datetime, timedelta, timezone
 from cryptography.fernet import Fernet
 from supabase import create_client
-import os
+
+supabase = create_client(
+    os.environ["SUPABASE_URL"],
+    os.environ["SUPABASE_ANON_KEY"]
+)
+
+fernet = Fernet(os.environ["FERNET_KEY"].encode())
 
 def handler(request):
-    try:
-        SUPABASE_URL = os.environ["SUPABASE_URL"]
-        SUPABASE_KEY = os.environ["SUPABASE_ANON_KEY"]
-        FERNET_KEY = os.environ["FERNET_KEY"].encode()
+    body = json.loads(request.body.decode("utf-8"))
+    text = body["text"]
 
-        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-        fernet = Fernet(FERNET_KEY)
+    otp = str(random.randint(100000, 999999))
+    encrypted = fernet.encrypt(text.encode()).decode()
+    expires_at = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
 
-        body = json.loads(request.body)
-        text = body.get("text")
-        if not text:
-            return {
-                "statusCode": 400,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"error": "Text required"})
-            }
+    supabase.table("notes").insert({
+        "otp": otp,
+        "encrypted_text": encrypted,
+        "expires_at": expires_at
+    }).execute()
 
-        otp = str(random.randint(100000, 999999))
-        encrypted_text = fernet.encrypt(text.encode()).decode()
-        expires_at = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
-
-        supabase.table("notes").insert({
-            "otp": otp,
-            "encrypted_text": encrypted_text,
-            "expires_at": expires_at
-        }).execute()
-
-        return {
-            "statusCode": 201,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"otp": otp, "expires_in": "5 minutes"})
-        }
-
-    except Exception as e:
-        return {
-            "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": str(e)})
-        }
+    return {
+        "statusCode": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": json.dumps({"otp": otp})
+    }
