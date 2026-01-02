@@ -1,3 +1,4 @@
+# api/notes.py
 import json
 import random
 import os
@@ -5,24 +6,31 @@ from datetime import datetime, timezone, timedelta
 from cryptography.fernet import Fernet
 from supabase import create_client
 
-SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_KEY = os.environ["SUPABASE_ANON_KEY"]
-FERNET_KEY = os.environ["FERNET_KEY"].encode()
-
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-fernet = Fernet(FERNET_KEY)
-
 def handler(request):
     try:
-        if not hasattr(request, "body") or not request.body:
+        SUPABASE_URL = os.environ.get("SUPABASE_URL")
+        SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
+        FERNET_KEY = os.environ.get("FERNET_KEY")
+
+        if not all([SUPABASE_URL, SUPABASE_KEY, FERNET_KEY]):
+            return {
+                "statusCode": 500,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"error": "Missing required environment variables"})
+            }
+
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        fernet = Fernet(FERNET_KEY.encode())
+
+        if not request.body:
             return {
                 "statusCode": 400,
                 "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"error": "No request body provided"})
+                "body": json.dumps({"error": "Empty request body"})
             }
 
         body = json.loads(request.body.decode("utf-8"))
-        text = body.get("text")
+        text = body.get("text", "").strip()
 
         if not text:
             return {
@@ -54,11 +62,11 @@ def handler(request):
         return {
             "statusCode": 400,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "Invalid JSON in request body"})
+            "body": json.dumps({"error": "Invalid JSON"})
         }
     except Exception as e:
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "Server error: " + str(e)})
+            "body": json.dumps({"error": f"Server error: {str(e)}"})
         }
