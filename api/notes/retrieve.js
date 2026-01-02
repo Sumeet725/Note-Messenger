@@ -11,10 +11,7 @@ export default async function handler(req, res) {
     }
 
     const { otp } = req.body;
-
-    if (!otp) {
-        return res.status(400).json({ error: "OTP required" });
-    }
+    if (!otp) return res.status(400).json({ error: "OTP required" });
 
     const { data, error } = await supabase
         .from("notes")
@@ -22,7 +19,7 @@ export default async function handler(req, res) {
         .eq("otp", otp)
         .single();
 
-    if (!data || error) {
+    if (error || !data) {
         return res.status(404).json({ error: "Invalid OTP" });
     }
 
@@ -32,6 +29,5 @@ export default async function handler(req, res) {
     }
 
     await supabase.from("notes").delete().eq("id", data.id);
-
     res.status(200).json({ text: data.encrypted_text });
 }
