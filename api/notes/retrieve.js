@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
     process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
+    process.env.SUPABASE_ANON_KEY
 );
 
 export default async function handler(req, res) {
@@ -11,29 +11,27 @@ export default async function handler(req, res) {
     }
 
     const { otp } = req.body;
+
     if (!otp) {
         return res.status(400).json({ error: "OTP required" });
     }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
         .from("notes")
         .select("*")
         .eq("otp", otp)
         .single();
 
-    if (!data) {
+    if (!data || error) {
         return res.status(404).json({ error: "Invalid OTP" });
     }
 
-    if (new Date(data.expires_at) < new Date()) {
+    if (new Date() > new Date(data.expires_at)) {
+        await supabase.from("notes").delete().eq("id", data.id);
         return res.status(410).json({ error: "OTP expired" });
     }
 
-    // decode
-    const text = Buffer.from(data.encrypted_text, "base64").toString("utf-8");
+    await supabase.from("notes").delete().eq("id", data.id);
 
-    // one-time read
-    await supabase.from("notes").delete().eq("otp", otp);
-
-    res.status(200).json({ text });
+    res.status(200).json({ text: data.encrypted_text });
 }
