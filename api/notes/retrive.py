@@ -13,31 +13,38 @@ fernet = Fernet(os.environ["FERNET_KEY"].encode())
 
 def handler(request):
     try:
-        body = json.loads(request.get_data().decode())
-    except:
-        body = {}
+        body = request.json if hasattr(request, "json") else json.loads(request.body)
+        otp = body.get("otp")
 
-    otp = body.get("otp")
-    if not otp:
-        return {"statusCode": 400, "body": json.dumps({"error": "OTP required"})}
+        if not otp:
+            return {"statusCode": 400, "body": json.dumps({"error": "OTP required"})}
 
-    res = supabase.table("notes") \
-        .select("id, encrypted_text, expires_at") \
-        .eq("otp", otp) \
-        .single() \
-        .execute()
+        res = supabase.table("notes") \
+            .select("id, encrypted_text, expires_at") \
+            .eq("otp", otp) \
+            .single() \
+            .execute()
 
-    if not res.data:
-        return {"statusCode": 404, "body": json.dumps({"error": "Invalid OTP"})}
+        if not res.data:
+            return {"statusCode": 404, "body": json.dumps({"error": "Invalid OTP"})}
 
-    expires_at = datetime.fromisoformat(res.data["expires_at"]).replace(tzinfo=timezone.utc)
+        expires_at = datetime.fromisoformat(res.data["expires_at"])
+        if datetime.now(timezone.utc) > expires_at:
+            supabase.table("notes").delete().eq("id", res.data["id"]).execute()
+            return {"statusCode": 410, "body": json.dumps({"error": "OTP expired"})}
 
-    if datetime.now(timezone.utc) > expires_at:
+        text = fernet.decrypt(res.data["encrypted_text"].encode()).decode()
         supabase.table("notes").delete().eq("id", res.data["id"]).execute()
-        return {"statusCode": 410, "body": json.dumps({"error": "OTP expired"})}
 
-    text = fernet.decrypt(res.data["encrypted_text"].encode()).decode()
+        return {
+            "statusCode": 200,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"text": text})
+        }
 
-    supabase.table("notes").delete().eq("id", res.data["id"]).execute()
-
-    return {"statusCode": 200, "body": json.dumps({"text": text})}
+    except Exception as e:
+        return {
+            "statusCode": 500,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"error": str(e)})
+        }
