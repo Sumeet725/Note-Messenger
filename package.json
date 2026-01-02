@@ -1,8 +1,24 @@
 {
-    "name": "note-messenger",
-    "version": "1.0.0",
-    "type": "module",
-    "dependencies": {
-        "@supabase/supabase-js": "^2.39.0"
-    }
+  "name": "note-messenger",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.89.0"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sumeet725/Note-Messenger.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sumeet725/Note-Messenger/issues"
+  },
+  "homepage": "https://github.com/Sumeet725/Note-Messenger#readme",
+  "description": ""
 }
