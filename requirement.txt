@@ -1,2 +1,3 @@
-supabase
 cryptography
+python-dotenv
+supabase

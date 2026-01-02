@@ -11,16 +11,17 @@ async function createNote() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text })
         });
-        const data = await res.json();
 
+        const data = await res.json();
         if (res.ok) {
-            document.getElementById("otpResult").innerText = "Your OTP: " + data.otp + " (expires in 5 minutes)";
+            document.getElementById("otpResult").innerText =
+                "Your OTP: " + data.otp + " (expires in 5 minutes)";
             document.getElementById("noteText").value = "";
         } else {
-            document.getElementById("otpResult").innerText = data.error || "Failed to create note";
+            document.getElementById("otpResult").innerText = data.error;
         }
     } catch (err) {
-        document.getElementById("otpResult").innerText = "Network error: " + err.message;
+        document.getElementById("otpResult").innerText = "Network error: " + err;
     }
 }
 
@@ -37,15 +38,15 @@ async function getNote() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ otp })
         });
-        const data = await res.json();
 
+        const data = await res.json();
         if (res.ok) {
             document.getElementById("noteOutput").innerText = "Your Note: " + data.text;
             document.getElementById("otpInput").value = "";
         } else {
-            document.getElementById("noteOutput").innerText = data.error || "Failed to retrieve note";
+            document.getElementById("noteOutput").innerText = data.error;
         }
     } catch (err) {
-        document.getElementById("noteOutput").innerText = "Network error: " + err.message;
+        document.getElementById("noteOutput").innerText = "Network error: " + err;
     }
 }

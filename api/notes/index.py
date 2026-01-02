@@ -5,18 +5,17 @@ from cryptography.fernet import Fernet
 from supabase import create_client
 import os
 
-supabase = create_client(
-    os.environ["SUPABASE_URL"],
-    os.environ["SUPABASE_ANON_KEY"]
-)
-
-fernet = Fernet(os.environ["FERNET_KEY"].encode())
-
 def handler(request):
     try:
-        body = request.json if hasattr(request, "json") else json.loads(request.body)
-        text = body.get("text")
+        SUPABASE_URL = os.environ["SUPABASE_URL"]
+        SUPABASE_KEY = os.environ["SUPABASE_ANON_KEY"]
+        FERNET_KEY = os.environ["FERNET_KEY"].encode()
 
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        fernet = Fernet(FERNET_KEY)
+
+        body = json.loads(request.body)
+        text = body.get("text")
         if not text:
             return {
                 "statusCode": 400,
@@ -25,12 +24,12 @@ def handler(request):
             }
 
         otp = str(random.randint(100000, 999999))
-        encrypted = fernet.encrypt(text.encode()).decode()
+        encrypted_text = fernet.encrypt(text.encode()).decode()
         expires_at = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
 
         supabase.table("notes").insert({
             "otp": otp,
-            "encrypted_text": encrypted,
+            "encrypted_text": encrypted_text,
             "expires_at": expires_at
         }).execute()
 
