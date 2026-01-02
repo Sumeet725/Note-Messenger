@@ -18,13 +18,17 @@ def handler(request):
         text = body.get("text")
 
         if not text:
-            return {"statusCode": 400, "body": json.dumps({"error": "Text required"})}
+            return {
+                "statusCode": 400,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"error": "Text required"})
+            }
 
         otp = str(random.randint(100000, 999999))
         encrypted = fernet.encrypt(text.encode()).decode()
         expires_at = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
 
-        res = supabase.table("notes").insert({
+        supabase.table("notes").insert({
             "otp": otp,
             "encrypted_text": encrypted,
             "expires_at": expires_at
