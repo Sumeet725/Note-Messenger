@@ -5,18 +5,22 @@ async function createNote() {
         return;
     }
 
-    const res = await fetch("/api/notes/index.py", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
-    });
+    try {
+        const res = await fetch("/api/notes", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text })
+        });
+        const data = await res.json();
 
-    const data = await res.json();
-    if (res.ok) {
-        document.getElementById("otpResult").innerText = "Your OTP: " + data.otp + " (expires in 5 minutes)";
-        document.getElementById("noteText").value = "";
-    } else {
-        document.getElementById("otpResult").innerText = data.error;
+        if (res.ok) {
+            document.getElementById("otpResult").innerText = "Your OTP: " + data.otp + " (expires in 5 minutes)";
+            document.getElementById("noteText").value = "";
+        } else {
+            document.getElementById("otpResult").innerText = data.error || "Failed to create note";
+        }
+    } catch (err) {
+        document.getElementById("otpResult").innerText = "Network error: " + err.message;
     }
 }
 
@@ -27,17 +31,21 @@ async function getNote() {
         return;
     }
 
-    const res = await fetch("/api/notes/retrieve.py", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ otp })
-    });
+    try {
+        const res = await fetch("/api/notes/retrieve", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ otp })
+        });
+        const data = await res.json();
 
-    const data = await res.json();
-    if (res.ok) {
-        document.getElementById("noteOutput").innerText = "Your Note: " + data.text;
-        document.getElementById("otpInput").value = "";
-    } else {
-        document.getElementById("noteOutput").innerText = data.error;
+        if (res.ok) {
+            document.getElementById("noteOutput").innerText = "Your Note: " + data.text;
+            document.getElementById("otpInput").value = "";
+        } else {
+            document.getElementById("noteOutput").innerText = data.error || "Failed to retrieve note";
+        }
+    } catch (err) {
+        document.getElementById("noteOutput").innerText = "Network error: " + err.message;
     }
 }
