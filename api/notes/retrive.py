@@ -13,7 +13,7 @@ def handler(request):
         supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
         fernet = Fernet(FERNET_KEY)
 
-        body = json.loads(request.body)
+        body = json.loads(request.body.decode("utf-8"))
         otp = body.get("otp")
         if not otp:
             return {
@@ -45,6 +45,7 @@ def handler(request):
             }
 
         text = fernet.decrypt(res.data["encrypted_text"].encode()).decode()
+    
         supabase.table("notes").delete().eq("id", res.data["id"]).execute()
 
         return {
