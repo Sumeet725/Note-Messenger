@@ -1,14 +1,10 @@
-/* Basic body styling */
 body {
     font-family: 'Courier New', Courier, monospace;
-    /* typewriter/ink look */
     background-color: #fdf6e3;
-    /* paper-like color */
     margin: 0;
     padding: 0;
 }
 
-/* Container for the two sections */
 .container {
     display: flex;
     flex-direction: column;
@@ -16,23 +12,19 @@ body {
     padding: 20px;
 }
 
-/* Notebook card style */
 .card {
     background-color: #fffdf5;
-    /* slightly off-white like paper */
     width: 100%;
     max-width: 500px;
     padding: 20px 25px;
     margin: 15px 0;
     border: 1px solid #e0dcdc;
-    /* subtle paper edge */
     border-radius: 10px;
     box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.1);
     position: relative;
     overflow: hidden;
 }
 
-/* Notebook lines */
 .card::before {
     content: "";
     position: absolute;
@@ -47,7 +39,6 @@ body {
     z-index: 0;
 }
 
-/* Headings */
 .card h2 {
     margin-top: 0;
     margin-bottom: 15px;
@@ -56,7 +47,6 @@ body {
     z-index: 1;
 }
 
-/* Inputs and textareas */
 textarea,
 input {
     width: 100%;
@@ -71,14 +61,12 @@ input {
     background-color: rgba(255, 255, 255, 0.9);
 }
 
-/* Buttons */
 button {
     margin-top: 12px;
     width: 100%;
     padding: 12px;
     font-size: 16px;
     background-color: #4d79ff;
-    /* stylish ink color */
     color: white;
     border: none;
     border-radius: 5px;
@@ -92,7 +80,6 @@ button:hover {
     background-color: #3b5fcc;
 }
 
-/* Output paragraphs */
 p {
     margin-top: 12px;
     word-wrap: break-word;
@@ -102,7 +89,6 @@ p {
     z-index: 1;
 }
 
-/* Mobile responsive tweaks */
 @media (min-width: 768px) {
     .container {
         flex-direction: row;
